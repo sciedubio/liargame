@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>과학 라이어 게임 - 만능 버전</title>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#06060f',
+                        neonMint: '#63ffbe',
+                        neonPink: '#ff63aa',
+                        neonBlue: '#00b8ff',
+                        neonYellow: '#ffaa33'
+                    },
+                    fontFamily: {
+                        title: ['"Black Han Sans"', 'sans-serif'],
+                        body: ['"Noto Sans KR"', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scale-btn': 'scaleBtn 0.1s ease-in-out',
+                        'shrink': 'shrink 5s linear forwards',
+                        'alert-flash': 'alertFlash 0.5s infinite alternate'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '1', filter: 'drop-shadow(0 0 10px rgba(99,255,190,0.5))' },
+                            '50%': { opacity: '.7', filter: 'drop-shadow(0 0 25px rgba(99,255,190,0.9))' },
+                        },
+                        shrink: {
+                            '0%': { width: '100%' },
+                            '100%': { width: '0%' }
+                        },
+                        alertFlash: {
+                            '0%': { backgroundColor: 'rgba(255, 99, 170, 0.9)' },
+                            '100%': { backgroundColor: 'rgba(255, 68, 102, 1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #06060f;
+            color: white;
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.06) 2px, transparent 2px),
+                radial-gradient(circle at 20% 90%, rgba(99, 255, 190, 0.05) 30vh, transparent 40vh),
+                radial-gradient(circle at 80% 10%, rgba(255, 99, 170, 0.05) 30vh, transparent 40vh);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+            background-attachment: fixed;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .text-neon-mint { text-shadow: 0 0 5px rgba(99,255,190,0.5), 0 0 10px rgba(99,255,190,0.3); }
+        .text-neon-pink { text-shadow: 0 0 5px rgba(255,99,170,0.5), 0 0 10px rgba(255,99,170,0.3); }
+        .text-neon-yellow { text-shadow: 0 0 5px rgba(255,170,51,0.5), 0 0 10px rgba(255,170,51,0.3); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ==========================================
+        // 1. 구글 시트 연동 URL 설정
+        // ==========================================
+        // [필수: 단원 데이터 불러오기용] 선생님의 마스터 시트(웹에 게시 CSV) 주소를 여기에 딱 한 번만 넣고 배포하세요!
+        const MASTER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQSqdK2sqOFSSPiTqStSXIIIz8AIlHk1rnE-bl45lDXVgcWywfo3Gm5COqEI6TUkrDm5eypo_3Ab6cH/pub?output=csv"; 
+        
+        // [선택: 결과 저장용] 점수를 저장할 Apps Script 배포 URL
+        const SCORE_SAVE_URL = "https://script.google.com/macros/s/AKfycbwjvEzFvmErTo7GHPK84On6ojeyAy4_IWR6y4QCxUCZjucrP0CsBIzXeRauCagjLRo/exec"; 
+
+        // ==========================================
+        // 2. 기본 게임 데이터 (폴백용)
+        // ==========================================
+        const DEFAULT_CONCEPTS = [
+            { word: "밀도", desc: "일정한 부피에 해당하는 질량. 물질마다 고유한 값을 가집니다.", foolWord: "무게" },
+            { word: "용해도", desc: "일정한 온도에서 용매 100g에 최대로 녹을 수 있는 용질의 g수.", foolWord: "농도" },
+            { word: "녹는점", desc: "고체가 액체로 상태 변화할 때의 온도.", foolWord: "발화점" },
+            { word: "어는점", desc: "액체가 고체로 상태 변화할 때의 온도.", foolWord: "이슬점" },
+            { word: "끓는점", desc: "액체가 기체로 상태 변화할 때의 내부 온도.", foolWord: "임계점" },
+            { word: "순물질", desc: "한 가지 물질로만 이루어진 물질.", foolWord: "원소" },
+            { word: "혼합물", desc: "두 가지 이상의 순물질이 본래의 성질을 잃지 않고 섞여 있는 물질.", foolWord: "화합물" },
+            { word: "크로마토그래피", desc: "혼합물을 이루는 성분 물질이 용매를 따라 이동하는 속도 차이를 이용하여 분리하는 방법.", foolWord: "리트머스 종이" }
+        ];
+
+        const SECRET_MISSIONS = ["블랙홀", "빅뱅", "아인슈타인", "광합성", "DNA", "세포분열", "E=mc²", "외계인", "타임머신", "양자역학", "공룡", "인공지능"];
+
+        // CSV 파서 유틸리티 (구글 시트 쉼표, 따옴표 처리)
+        function parseCSV(str) {
+            const arr = [];
+            let quote = false;
+            let row = 0, col = 0;
+            for (let c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+                if (cc == '"') { quote = !quote; continue; }
+                if (cc == ',' && !quote) { ++col; continue; }
+                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+                arr[row][col] += cc;
+            }
+            return arr;
+        }
+
+        // ==========================================
+        // 3. UI 컴포넌트 (모달)
+        // ==========================================
+        const CustomModal = ({ isOpen, type, title, message, onConfirm, onClose, content }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="glass-panel w-full max-w-md p-6 rounded-2xl shadow-2xl border-neonMint/30 animate-slide-up flex flex-col items-center text-center max-h-[90vh]">
+                        {type === 'loading' && <div className="w-12 h-12 border-4 border-white/20 border-t-neonMint rounded-full animate-spin mb-4"></div>}
+                        {type === 'alert' && <div className="text-4xl mb-4">⚠️</div>}
+                        {type === 'success' && <div className="text-4xl mb-4">✨</div>}
+                        
+                        <h3 className="font-title text-2xl text-white mb-2">{title}</h3>
+                        {message && <p className="text-gray-300 mb-6 whitespace-pre-wrap">{message}</p>}
+                        {content && <div className="w-full text-left mb-6 text-sm text-gray-300 overflow-y-auto no-scrollbar">{content}</div>}
+
+                        {type !== 'loading' && (
+                            <div className="flex gap-3 w-full mt-auto">
+                                {onClose && <button onClick={onClose} className="flex-1 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20">닫기</button>}
+                                {onConfirm && <button onClick={onConfirm} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-neonMint to-neonBlue text-darkBg font-bold">확인</button>}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 4. 메인 App 컴포넌트
+        // ==========================================
+        const App = () => {
+            // 라우팅 상태
+            const [view, setView] = React.useState('intro'); 
+            
+            // 덱(단원) 관리 상태
+            const [gameTitle, setGameTitle] = React.useState("물질의 특성");
+            const [conceptsList, setConceptsList] = React.useState(DEFAULT_CONCEPTS);
+            const [secretMissionPool, setSecretMissionPool] = React.useState(SECRET_MISSIONS);
+            const [deckGroups, setDeckGroups] = React.useState({});
+            const [isLoadingData, setIsLoadingData] = React.useState(true);
+
+            // 게임 설정 및 플레이어 상태
+            const [playerCount, setPlayerCount] = React.useState(4);
+            const [timeLimit, setTimeLimit] = React.useState(60);
+            const [isFoolMode, setIsFoolMode] = React.useState(false);
+            const [isSecretMissionMode, setIsSecretMissionMode] = React.useState(false);
+            const [isAutoShuffle, setIsAutoShuffle] = React.useState(true);
+            const [isBlindVoteMode, setIsBlindVoteMode] = React.useState(false); // [기능3] 비밀 투표 모드
+            const [groupName, setGroupName] = React.useState(''); // 추가된 부분: 모둠명 상태
+            const [players, setPlayers] = React.useState([]);
+            
+            // 게임 진행 상태
+            const [currentRound, setCurrentRound] = React.useState(1);
+            const [targetConcept, setTargetConcept] = React.useState(null);
+            const [liarId, setLiarId] = React.useState(null);
+            const [secretMissionPlayerId, setSecretMissionPlayerId] = React.useState(null);
+            const [secretMissionWord, setSecretMissionWord] = React.useState('');
+            
+            // 카드 확인 관련
+            const [checkIndex, setCheckIndex] = React.useState(0);
+            const [showCard, setShowCard] = React.useState(false);
+            const [showLiarHint, setShowLiarHint] = React.useState(false); // [기능1] 라이어 힌트
+            const [liarHintOptions, setLiarHintOptions] = React.useState([]);
+
+            // 토론(타이머) 및 중간 점검 상태
+            const [timeLeft, setTimeLeft] = React.useState(0);
+            const [isTimerRunning, setIsTimerRunning] = React.useState(false);
+            const [showMidpointAlert, setShowMidpointAlert] = React.useState(false);
+
+            // 투표 및 최후 변론 상태
+            const [selectedSuspectId, setSelectedSuspectId] = React.useState(null);
+            const [defenseTimeLeft, setDefenseTimeLeft] = React.useState(20);
+            const [isDefenseRunning, setIsDefenseRunning] = React.useState(false);
+            
+            // 비밀 투표 관련 상태 [기능3]
+            const [blindVotes, setBlindVotes] = React.useState({});
+            const [currentVoterIndex, setCurrentVoterIndex] = React.useState(0);
+            const [showBlindVotePass, setShowBlindVotePass] = React.useState(true);
+
+            // 미션 달성 여부 & 오답 노트 역사 [기능2]
+            const [missionAccomplished, setMissionAccomplished] = React.useState(false);
+            const [usedConceptsHistory, setUsedConceptsHistory] = React.useState([]);
+
+            const [modal, setModal] = React.useState({ isOpen: false });
+            const showModal = (config) => setModal({ ...config, isOpen: true });
+            const closeModal = () => setModal({ ...modal, isOpen: false });
+
+            // 컴포넌트 마운트 시 데이터 로딩 및 저장된 플레이어 이름 불러오기
+            React.useEffect(() => {
+                const savedNames = localStorage.getItem('liarGameSavedNames');
+                const savedGroup = localStorage.getItem('liarGameSavedGroup'); // 모둠명 불러오기
+                if (savedGroup) setGroupName(savedGroup);
+                
+                if (savedNames) {
+                    try {
+                        const parsed = JSON.parse(savedNames);
+                        if(parsed && parsed.length > 0) {
+                            setPlayerCount(parsed.length);
+                            setPlayers(parsed.map((name, i) => ({ id: i, name: name, score: 0 })));
+                        }
+                    } catch(e) {}
+                } else {
+                    setPlayers(Array.from({length: playerCount}, (_, i) => ({ id: i, name: `참여자 ${i+1}`, score: 0 })));
+                }
+
+                const fetchMasterData = async () => {
+                    if (!MASTER_CSV_URL) {
+                        setDeckGroups({ "중2 물질의 특성 (기본 예시)": { concepts: DEFAULT_CONCEPTS, secretMissions: SECRET_MISSIONS } });
+                        setIsLoadingData(false);
+                        return;
+                    }
+                    try {
+                        const response = await fetch(MASTER_CSV_URL);
+                        if(!response.ok) throw new Error("네트워크 응답 오류");
+                        const csvText = await response.text();
+                        const parsedData = parseCSV(csvText);
+                        
+                        const groups = {};
+                        parsedData.slice(1).forEach(row => {
+                            if (!row[0] || !row[1]) return;
+                            const unit = row[0].trim();
+                            const word = row[1].trim();
+                            const desc = row[2]?.trim() || "설명이 없습니다.";
+                            const foolWord = row[3]?.trim() || "비밀 단어";
+                            const secretWord = row[4]?.trim();
+                            
+                            if (!groups[unit]) groups[unit] = { concepts: [], secretMissions: [] };
+                            groups[unit].concepts.push({ word, desc, foolWord });
+                            if (secretWord) groups[unit].secretMissions.push(secretWord);
+                        });
+                        
+                        if (Object.keys(groups).length === 0) throw new Error("유효한 데이터가 없습니다.");
+                        setDeckGroups(groups);
+                    } catch (error) {
+                        console.error(error);
+                        setDeckGroups({ "데이터 로딩 실패 (기본값)": { concepts: DEFAULT_CONCEPTS, secretMissions: SECRET_MISSIONS } });
+                    } finally {
+                        setIsLoadingData(false);
+                    }
+                };
+                fetchMasterData();
+            }, []);
+
+            // 타이머 로직
+            React.useEffect(() => {
+                let interval;
+                if (isTimerRunning && timeLeft > 0) {
+                    if (timeLeft === Math.floor(timeLimit / 2) && timeLimit >= 30) {
+                        setIsTimerRunning(false); setShowMidpointAlert(true);
+                        setTimeout(() => { setShowMidpointAlert(false); setIsTimerRunning(true); setTimeLeft(prev => prev - 1); }, 5000);
+                        return;
+                    }
+                    interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+                } else if (timeLeft === 0 && isTimerRunning) setIsTimerRunning(false);
+                return () => clearInterval(interval);
+            }, [isTimerRunning, timeLeft, timeLimit]);
+
+            // 변론 타이머 로직
+            React.useEffect(() => {
+                let interval;
+                if (isDefenseRunning && defenseTimeLeft > 0) interval = setInterval(() => setDefenseTimeLeft(prev => prev - 1), 1000);
+                else if (defenseTimeLeft === 0 && isDefenseRunning) setIsDefenseRunning(false);
+                return () => clearInterval(interval);
+            }, [isDefenseRunning, defenseTimeLeft]);
+
+            // 공통 스타일
+            const btnPrimary = "w-full py-4 rounded-2xl bg-gradient-to-r from-neonMint to-neonBlue text-darkBg font-title text-xl active:scale-95 transition-transform shadow-[0_0_15px_rgba(99,255,190,0.3)]";
+            const btnSecondary = "w-full py-4 rounded-2xl bg-white/10 text-white font-title text-xl active:scale-95 transition-transform border border-white/20";
+            const btnDanger = "w-full py-4 rounded-2xl bg-gradient-to-r from-neonPink to-red-500 text-white font-title text-xl active:scale-95 transition-transform shadow-[0_0_15px_rgba(255,99,170,0.3)]";
+
+            const submitGameData = async () => {
+                if (!SCORE_SAVE_URL) {
+                    showModal({ type: 'alert', title: 'DB 연동 안됨', message: '점수 저장용 시트 URL이 설정되지 않았습니다.', onConfirm: closeModal });
+                    return;
+                }
+                showModal({ type: 'loading', title: '저장 중...' });
+                try {
+                    await fetch(SCORE_SAVE_URL, {
+                        method: 'POST', mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            date: new Date().toISOString(), 
+                            group: groupName || '미지정', // 모둠명 추가
+                            rounds: currentRound, 
+                            players: players.map(p => ({ name: p.name, score: p.score })), 
+                            theme: gameTitle 
+                        })
+                    });
+                    showModal({ type: 'success', title: '저장 완료', message: '데이터 전송 성공!', onConfirm: () => { closeModal(); resetGame(); } });
+                } catch (e) {
+                    showModal({ type: 'alert', title: '저장 실패', message: '오류가 발생했습니다.', onConfirm: closeModal });
+                }
+            };
+
+            const confirmNamesAndStart = () => {
+                const finalPlayers = players.map((p, i) => ({ ...p, name: p.name.trim() || `참여자 ${i+1}` }));
+                setPlayers(finalPlayers);
+                localStorage.setItem('liarGameSavedNames', JSON.stringify(finalPlayers.map(p => p.name)));
+                localStorage.setItem('liarGameSavedGroup', groupName); // 모둠명 저장
+                startRound(finalPlayers);
+            };
+
+            const startRound = (currentPlayersData = players) => {
+                let currentPlayers = [...currentPlayersData];
+                if (isAutoShuffle) {
+                    currentPlayers.sort(() => Math.random() - 0.5);
+                }
+                setPlayers(currentPlayers);
+
+                const randomConcept = conceptsList[Math.floor(Math.random() * conceptsList.length)];
+                const liarIdx = Math.floor(Math.random() * currentPlayers.length);
+                
+                setTargetConcept(randomConcept);
+                setLiarId(currentPlayers[liarIdx].id);
+
+                if (isSecretMissionMode) {
+                    const sciIndices = currentPlayers.map((p, i) => i).filter(i => i !== liarIdx);
+                    const missionIdx = sciIndices[Math.floor(Math.random() * sciIndices.length)];
+                    setSecretMissionPlayerId(currentPlayers[missionIdx].id);
+                    setSecretMissionWord(secretMissionPool[Math.floor(Math.random() * secretMissionPool.length)]);
+                } else {
+                    setSecretMissionPlayerId(null);
+                }
+
+                // [기능2] 오답 노트 히스토리 추가
+                setUsedConceptsHistory(prev => {
+                    const newHist = [...prev];
+                    if (!newHist.find(h => h.round === currentRound && h.word === randomConcept.word)) {
+                        newHist.push({ round: currentRound, word: randomConcept.word, desc: randomConcept.desc });
+                    }
+                    return newHist;
+                });
+
+                setMissionAccomplished(false);
+                setCheckIndex(0);
+                setShowCard(false);
+                setShowLiarHint(false); // [기능1] 힌트 초기화
+                setLiarHintOptions([]);
+                setView('role_check');
+            };
+
+            const resetGame = () => {
+                setCurrentRound(1);
+                setPlayers(prev => prev.map(p => ({...p, score: 0})));
+                setUsedConceptsHistory([]);
+                setView('intro');
+            };
+
+            // ==========================================
+            // 뷰 렌더링 함수들
+            // ==========================================
+            const renderIntro = () => (
+                <div className="flex flex-col items-center justify-center min-h-screen p-6 animate-fade-in text-center relative">
+                    <div className="mb-8 mt-10">
+                        <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-neonMint/20 to-neonBlue/20 border-2 border-neonMint/30 flex items-center justify-center text-4xl mb-4 shadow-[0_0_20px_rgba(99,255,190,0.3)]">🧪</div>
+                        <h2 className="text-neonBlue font-bold tracking-widest mb-2">어떤 수업이든 적용 가능한</h2>
+                        <h1 className="font-title text-6xl text-transparent bg-clip-text bg-gradient-to-r from-neonMint to-neonPink drop-shadow-[0_0_10px_rgba(99,255,190,0.5)] leading-tight mb-2">과학 라이어 게임</h1>
+                        <p className="text-gray-400 text-sm mt-4">단원 내용을 토론하며 라이어를 찾아보세요!</p>
+                    </div>
+                    <button onClick={() => setView('deck_select')} className={btnPrimary}>게임 시작하기 🚀</button>
+                    
+                    <div className="absolute bottom-6 text-xs text-gray-500 tracking-wider">
+                        Created by <span className="text-neonMint font-bold">Yang DH</span>
+                    </div>
+                </div>
+            );
+
+            const renderDeckSelect = () => (
+                <div className="flex flex-col min-h-screen p-6 animate-slide-up">
+                    <h2 className="font-title text-3xl text-white mb-2 mt-4 text-center">단원 선택</h2>
+                    <p className="text-gray-400 text-sm text-center mb-6">오늘 수업할 단원을 선택하세요.</p>
+                    
+                    <div className="space-y-4 flex-1 overflow-y-auto no-scrollbar pb-4">
+                        {isLoadingData ? (
+                            <div className="flex flex-col items-center justify-center py-10">
+                                <div className="w-10 h-10 border-4 border-white/20 border-t-neonMint rounded-full animate-spin mb-4"></div>
+                                <p className="text-neonMint font-bold animate-pulse">데이터를 불러오는 중입니다...</p>
+                            </div>
+                        ) : (
+                            Object.entries(deckGroups).map(([unitName, data], idx) => (
+                                <button key={idx} 
+                                    onClick={() => { 
+                                        setConceptsList(data.concepts); 
+                                        setSecretMissionPool(data.secretMissions.length > 0 ? data.secretMissions : SECRET_MISSIONS);
+                                        setGameTitle(unitName); 
+                                        setView('settings'); 
+                                    }} 
+                                    className="w-full glass-panel p-6 rounded-2xl border border-neonMint/50 hover:bg-neonMint/10 transition-colors text-left flex items-center justify-between group">
+                                    <div className="flex-1 pr-4">
+                                        <span className="text-xs font-bold text-neonMint bg-neonMint/20 px-2 py-1 rounded-full mb-2 inline-block">
+                                            {data.concepts.length}개의 제시어
+                                        </span>
+                                        <h3 className="font-title text-2xl text-white break-keep leading-tight group-hover:text-neonMint transition-colors">{unitName}</h3>
+                                        <p className="text-xs text-gray-400 mt-2 truncate w-full">
+                                            {data.concepts.slice(0, 3).map(c => c.word).join(', ')} 등...
+                                        </p>
+                                    </div>
+                                    <span className="text-3xl transition-transform group-hover:translate-x-2">👉</span>
+                                </button>
+                            ))
+                        )}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/10 flex justify-center">
+                        <button onClick={showGuideModal} className="text-sm text-gray-400 hover:text-white underline">선생님이신가요? 나만의 단원 연동하는 법</button>
+                    </div>
+                </div>
+            );
+
+            const renderSettings = () => (
+                <div className="flex flex-col min-h-screen p-6 animate-slide-up">
+                    <h2 className="font-title text-3xl text-white mb-2 mt-4">게임 설정</h2>
+                    <p className="text-neonMint font-bold text-sm mb-6">현재 단원: {gameTitle}</p>
+                    
+                    <div className="space-y-4 flex-1 overflow-y-auto no-scrollbar pb-4">
+                        <div className="glass-panel p-5 rounded-2xl">
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="font-bold text-lg text-neonMint">참여 인원</span>
+                                <span className="font-title text-2xl">{playerCount} 명</span>
+                            </div>
+                            <div className="flex gap-4">
+                                <button onClick={() => {
+                                    const newCount = Math.max(3, playerCount - 1);
+                                    setPlayerCount(newCount);
+                                    setPlayers(prev => prev.slice(0, newCount));
+                                }} className="flex-1 py-2 bg-white/10 rounded-xl hover:bg-white/20">-</button>
+                                <button onClick={() => {
+                                    const newCount = Math.min(10, playerCount + 1);
+                                    setPlayerCount(newCount);
+                                    setPlayers(prev => {
+                                        const newArr = [...prev];
+                                        while(newArr.length < newCount) newArr.push({ id: newArr.length, name: '', score: 0 });
+                                        return newArr;
+                                    });
+                                }} className="flex-1 py-2 bg-white/10 rounded-xl hover:bg-white/20">+</button>
+                            </div>
+                        </div>
+
+                        <div className="glass-panel p-5 rounded-2xl">
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="font-bold text-lg text-neonBlue">토론 시간</span>
+                                <span className="font-title text-2xl">{timeLimit} 초</span>
+                            </div>
+                            <input type="range" min="30" max="180" step="30" value={timeLimit} onChange={(e) => setTimeLimit(parseInt(e.target.value))} className="w-full accent-neonBlue" />
+                        </div>
+
+                        {/* 모드 토글들 */}
+                        <div className="glass-panel p-4 rounded-2xl flex justify-between items-center cursor-pointer" onClick={() => setIsBlindVoteMode(!isBlindVoteMode)}>
+                            <div><span className="font-bold text-neonBlue">비밀 투표 모드</span><p className="text-xs text-gray-400 mt-1">익명으로 폰을 돌려가며 지목</p></div>
+                            <div className={`w-12 h-6 rounded-full p-1 transition-colors ${isBlindVoteMode ? 'bg-neonBlue' : 'bg-gray-700'}`}><div className={`w-4 h-4 bg-white rounded-full transition-transform ${isBlindVoteMode ? 'translate-x-6' : 'translate-x-0'}`}></div></div>
+                        </div>
+
+                        <div className="glass-panel p-4 rounded-2xl flex justify-between items-center cursor-pointer" onClick={() => setIsFoolMode(!isFoolMode)}>
+                            <div><span className="font-bold text-neonPink">바보 라이어 모드</span><p className="text-xs text-gray-400 mt-1">라이어에게 가짜 단어 제공</p></div>
+                            <div className={`w-12 h-6 rounded-full p-1 transition-colors ${isFoolMode ? 'bg-neonPink' : 'bg-gray-700'}`}><div className={`w-4 h-4 bg-white rounded-full transition-transform ${isFoolMode ? 'translate-x-6' : 'translate-x-0'}`}></div></div>
+                        </div>
+
+                        <div className="glass-panel p-4 rounded-2xl flex justify-between items-center cursor-pointer" onClick={() => setIsSecretMissionMode(!isSecretMissionMode)}>
+                            <div><span className="font-bold text-neonYellow">시크릿 미션 모드</span><p className="text-xs text-gray-400 mt-1">과학자 1명 페이크 미션 부여</p></div>
+                            <div className={`w-12 h-6 rounded-full p-1 transition-colors ${isSecretMissionMode ? 'bg-neonYellow' : 'bg-gray-700'}`}><div className={`w-4 h-4 bg-white rounded-full transition-transform ${isSecretMissionMode ? 'translate-x-6' : 'translate-x-0'}`}></div></div>
+                        </div>
+
+                        <div className="glass-panel p-4 rounded-2xl flex justify-between items-center cursor-pointer" onClick={() => setIsAutoShuffle(!isAutoShuffle)}>
+                            <div><span className="font-bold text-neonMint">자리 배치 섞기</span><p className="text-xs text-gray-400 mt-1">매 라운드 말하는 순서 랜덤화</p></div>
+                            <div className={`w-12 h-6 rounded-full p-1 transition-colors ${isAutoShuffle ? 'bg-neonMint' : 'bg-gray-700'}`}><div className={`w-4 h-4 bg-white rounded-full transition-transform ${isAutoShuffle ? 'translate-x-6' : 'translate-x-0'}`}></div></div>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                        <button onClick={() => setView('name_input')} className={btnPrimary}>이름 입력하기 ▶</button>
+                    </div>
+                </div>
+            );
+
+            const renderNameInput = () => (
+                <div className="flex flex-col min-h-screen p-6 animate-slide-up">
+                    <h2 className="font-title text-3xl text-white mb-2 mt-4 text-center">참여자 이름 입력</h2>
+                    <p className="text-gray-400 text-sm text-center mb-6">입력한 이름은 다음에도 자동 저장됩니다.</p>
+                    
+                    {/* 모둠명 입력 필드 추가 */}
+                    <div className="mb-4 glass-panel p-4 rounded-xl border border-neonYellow/50">
+                        <p className="text-xs text-neonYellow font-bold mb-2">우리 모둠 이름 (또는 모둠 번호)</p>
+                        <input 
+                            type="text" 
+                            placeholder="예: 1모둠, 아인슈타인조"
+                            value={groupName}
+                            onChange={(e) => setGroupName(e.target.value)}
+                            className="w-full bg-black/50 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:border-neonYellow transition-colors"
+                        />
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-4 space-y-3">
+                        {players.map((p, index) => (
+                            <div key={index} className="flex items-center gap-3 glass-panel p-3 rounded-xl">
+                                <span className="font-title text-xl text-neonMint w-8 text-center">{index + 1}</span>
+                                <input 
+                                    type="text" 
+                                    placeholder={`참여자 ${index + 1} 이름`}
+                                    value={p.name.startsWith('참여자 ') ? '' : p.name}
+                                    onChange={(e) => {
+                                        const newPlayers = [...players];
+                                        newPlayers[index].name = e.target.value;
+                                        setPlayers(newPlayers);
+                                    }}
+                                    className="flex-1 bg-transparent border-b border-white/20 px-2 py-1 text-white focus:outline-none focus:border-neonMint"
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-white/10 flex gap-3">
+                        <button onClick={() => setView('settings')} className="w-1/3 py-4 rounded-2xl bg-white/10 font-bold hover:bg-white/20">뒤로</button>
+                        <button onClick={confirmNamesAndStart} className="w-2/3 py-4 rounded-2xl bg-gradient-to-r from-neonMint to-neonBlue text-darkBg font-title text-xl shadow-[0_0_15px_rgba(99,255,190,0.3)]">준비 완료! 시작</button>
+                    </div>
+                </div>
+            );
+
+            const renderProgressBar = (activeIndex) => (
+                <div className="w-full max-w-sm flex gap-1.5 mb-6">
+                    {players.map((p, idx) => (
+                        <div key={p.id} className="flex-1 flex flex-col items-center gap-1">
+                            <div className={`w-full h-1.5 rounded-full transition-colors ${idx < activeIndex ? 'bg-neonMint' : idx === activeIndex ? 'bg-neonPink animate-pulse' : 'bg-white/20'}`} />
+                            <span className="text-[10px] text-gray-500 truncate w-full text-center">{p.name}</span>
+                        </div>
+                    ))}
+                </div>
+            );
+
+            // [기능1] 힌트 생성 로직
+            const handleShowLiarHint = () => {
+                const others = conceptsList.filter(c => c.word !== targetConcept.word);
+                const shuffledOthers = others.sort(() => 0.5 - Math.random()).slice(0, 3);
+                const options = [...shuffledOthers, targetConcept].sort(() => 0.5 - Math.random());
+                setLiarHintOptions(options.map(o => o.word));
+                setShowLiarHint(true);
+            };
+
+            const renderRoleCheck = () => {
+                const currentPlayer = players[checkIndex];
+                const isLiar = currentPlayer.id === liarId;
+                const isMissionTarget = currentPlayer.id === secretMissionPlayerId;
+
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen p-6 animate-fade-in text-center">
+                        {renderProgressBar(checkIndex)}
+                        <div className="mb-8">
+                            <span className="text-neonMint font-bold">ROUND {currentRound}</span>
+                            <h2 className="font-title text-4xl mt-2">{currentPlayer.name}</h2>
+                            <p className="text-gray-400 text-sm mt-2">화면을 가리고 혼자만 확인하세요</p>
+                        </div>
+                        {!showCard ? (
+                            <button onClick={() => setShowCard(true)} className="glass-panel w-full max-w-sm aspect-[3/4] rounded-3xl flex flex-col items-center justify-center border-neonMint/50 shadow-[0_0_30px_rgba(99,255,190,0.1)] active:scale-95 transition-transform">
+                                <div className="text-5xl mb-4 animate-bounce">👆</div>
+                                <span className="font-title text-2xl text-white">터치하여 역할 확인</span>
+                            </button>
+                        ) : (
+                            <div className="glass-panel w-full max-w-sm rounded-3xl flex flex-col items-center justify-center p-8 animate-slide-up border-white/20 relative min-h-[350px]">
+                                {isLiar ? (
+                                    <>
+                                        <h3 className="font-title text-4xl text-neonPink mb-4">라이어 당첨!</h3>
+                                        {isFoolMode ? (
+                                            <div className="bg-neonPink/10 p-4 rounded-xl border border-neonPink/30 w-full">
+                                                <p className="text-sm text-gray-300 mb-1">제시어</p>
+                                                <p className="font-bold text-3xl text-white">{targetConcept.foolWord}</p>
+                                            </div>
+                                        ) : <p className="text-gray-300">과학자들의 눈치를 보며<br/>자연스럽게 행동하세요.</p>}
+                                        
+                                        {/* [기능1] 객관식 힌트 찬스 */}
+                                        {!isFoolMode && !showLiarHint && (
+                                            <button onClick={handleShowLiarHint} className="mt-6 px-5 py-3 bg-neonBlue/20 text-neonBlue border border-neonBlue rounded-xl text-sm font-bold hover:bg-neonBlue/30 transition-colors">
+                                                💡 제시어 힌트 보기
+                                            </button>
+                                        )}
+                                        {!isFoolMode && showLiarHint && (
+                                            <div className="mt-6 w-full bg-black/40 p-3 rounded-xl border border-white/10 animate-fade-in">
+                                                <p className="text-xs text-neonMint mb-3 font-bold">다음 4개 중 하나가 진짜 제시어입니다!</p>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {liarHintOptions.map((opt, i) => (
+                                                        <div key={i} className="bg-white/5 p-2 rounded-lg text-sm text-white border border-white/10">{opt}</div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="text-neonMint font-bold mb-2 text-xl">과학자</p>
+                                        <div className="bg-white/5 p-4 rounded-xl border border-white/10 w-full mb-4">
+                                            <p className="text-xs text-gray-400 mb-1">제시어</p>
+                                            <p className="font-title text-3xl text-white text-neon-mint mb-2 break-keep">{targetConcept.word}</p>
+                                        </div>
+                                        {isMissionTarget && (
+                                            <div className="bg-neonYellow/10 p-3 rounded-xl border border-neonYellow/30 w-full mt-2 animate-pulse-glow">
+                                                <p className="text-xs font-bold text-neonYellow mb-1">🕵️ 시크릿 미션!</p>
+                                                <p className="text-sm text-white">토론 중 <strong>[{secretMissionWord}]</strong> 단어를 말하세요!</p>
+                                            </div>
+                                        )}
+                                        {!isMissionTarget && <p className="text-xs text-gray-400 mt-2 break-keep text-left">설명: {targetConcept.desc}</p>}
+                                    </>
+                                )}
+                            </div>
+                        )}
+                        {showCard && (
+                            <div className="w-full max-w-sm mt-8 animate-fade-in">
+                                <button onClick={() => {
+                                    if (checkIndex < playerCount - 1) { setCheckIndex(checkIndex + 1); setShowCard(false); setShowLiarHint(false); setLiarHintOptions([]); } 
+                                    else { setTimeLeft(timeLimit); setIsTimerRunning(true); setView('discussion'); }
+                                }} className={btnPrimary}>
+                                    {checkIndex < playerCount - 1 ? '확인 완료 (다음 사람에게)' : '토론 시작하기'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const renderDiscussion = () => {
+                const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen p-6 relative">
+                        {showMidpointAlert && (
+                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neonPink/90 backdrop-blur-md animate-alert-flash text-center p-6">
+                                <span className="text-6xl mb-4">🚨</span>
+                                <h2 className="font-title text-5xl text-white mb-4">중간 점검!</h2>
+                                <p className="text-2xl text-white font-bold mb-8">하나, 둘, 셋 하면<br/>가장 의심되는 사람을 가리키세요!</p>
+                                <div className="w-full max-w-xs h-3 bg-black/50 rounded-full overflow-hidden">
+                                    <div className="h-full bg-white animate-shrink"></div>
+                                </div>
+                            </div>
+                        )}
+                        <div className="text-center mb-12">
+                            <h2 className="text-neonMint font-bold tracking-widest mb-2">자유 토론 ({gameTitle})</h2>
+                            <p className="text-gray-400 text-sm">표시된 순서대로 돌아가며 설명하세요.</p>
+                            <div className="mt-4 flex flex-wrap justify-center gap-2">
+                                {players.map((p, i) => <span key={i} className="text-xs bg-white/10 px-2 py-1 rounded-md">{i+1}. {p.name}</span>)}
+                            </div>
+                        </div>
+                        <div className="relative w-64 h-64 flex items-center justify-center mb-12">
+                            <div className={`absolute inset-0 rounded-full border-4 ${timeLeft <= 10 ? 'border-neonPink' : 'border-neonMint'} opacity-20`}></div>
+                            <div className={`absolute inset-4 rounded-full border-2 ${timeLeft <= 10 ? 'border-neonPink' : 'border-neonMint'} opacity-50 ${isTimerRunning ? 'animate-spin' : ''}`} style={{animationDuration: '3s'}}></div>
+                            <h1 className={`font-title text-7xl z-10 ${timeLeft <= 10 ? 'text-neonPink animate-pulse' : 'text-white text-neon-mint'}`}>
+                                {m}:{s < 10 ? '0'+s : s}
+                            </h1>
+                        </div>
+                        <div className="w-full max-w-sm flex gap-4">
+                            <button onClick={() => setIsTimerRunning(!isTimerRunning)} className={btnSecondary}>{isTimerRunning ? '일시정지' : '재개'}</button>
+                            <button onClick={() => { 
+                                setIsTimerRunning(false); 
+                                setSelectedSuspectId(null); 
+                                // [기능3] 라우팅 분기: 비밀 투표 모드 ON/OFF
+                                if (isBlindVoteMode) {
+                                    setBlindVotes({});
+                                    setCurrentVoterIndex(0);
+                                    setShowBlindVotePass(true);
+                                    setView('blind_vote');
+                                } else {
+                                    setView('vote'); 
+                                }
+                            }} className={btnDanger}>투표 하러가기</button>
+                        </div>
+                    </div>
+                );
+            };
+
+            // [기능3] 비밀 투표 화면
+            const renderBlindVote = () => {
+                // 모든 사람이 투표를 마친 경우 결과 처리
+                if (currentVoterIndex >= players.length) {
+                    const counts = {};
+                    Object.values(blindVotes).forEach(id => counts[id] = (counts[id] || 0) + 1);
+                    const sorted = Object.entries(counts).map(([id, cnt]) => ({ id: parseInt(id), cnt })).sort((a,b) => b.cnt - a.cnt);
+                    const maxCnt = sorted[0]?.cnt || 0;
+                    const topCandidates = sorted.filter(x => x.cnt === maxCnt).map(x => players.find(p => p.id === x.id));
+
+                    return (
+                        <div className="flex flex-col min-h-screen p-6 animate-slide-up text-center">
+                            <h2 className="font-title text-3xl text-neonBlue mb-6 mt-4">비밀 투표 결과</h2>
+                            <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-4">
+                                {sorted.map((item) => {
+                                    const p = players.find(x => x.id === item.id);
+                                    return (
+                                        <div key={item.id} className="glass-panel p-4 rounded-xl flex justify-between items-center">
+                                            <span className="font-bold text-lg">{p.name}</span>
+                                            <span className="text-neonMint font-title text-2xl">{item.cnt}표</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="mt-4 pt-6 border-t border-white/10">
+                                {topCandidates.length === 1 ? (
+                                    <button onClick={() => { setSelectedSuspectId(topCandidates[0].id); setDefenseTimeLeft(20); setIsDefenseRunning(true); setView('defense'); }} className={btnPrimary}>
+                                        {topCandidates[0].name} 지목 확정 (최후 변론)
+                                    </button>
+                                ) : (
+                                    <div>
+                                        <p className="text-neonPink mb-3 font-bold text-sm">동점자 발생! 최종 1명을 합의하여 선택하세요.</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {topCandidates.map(c => (
+                                                <button key={c.id} onClick={() => { setSelectedSuspectId(c.id); setDefenseTimeLeft(20); setIsDefenseRunning(true); setView('defense'); }} className="py-4 bg-neonPink/20 text-neonPink rounded-xl border border-neonPink font-bold hover:bg-neonPink/30 active:scale-95 transition-all">
+                                                    {c.name} 지목
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+
+                const voter = players[currentVoterIndex];
+
+                if (showBlindVotePass) {
+                    return (
+                        <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center animate-fade-in">
+                            <div className="text-6xl mb-6 animate-pulse">🤫</div>
+                            <h2 className="font-title text-3xl mb-4 text-neonBlue">비밀 투표</h2>
+                            <p className="text-gray-300 mb-8">기기를 <strong className="text-white text-lg">{voter.name}</strong> 님에게 넘겨주세요.<br/>다른 사람이 화면을 보지 못하게 가려주세요!</p>
+                            <button onClick={() => setShowBlindVotePass(false)} className={btnPrimary}>내가 {voter.name} 입니다 (투표 시작)</button>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="flex flex-col min-h-screen p-6 animate-slide-up">
+                        <div className="text-center mb-6 mt-4">
+                            <span className="text-neonMint font-bold">투표자: {voter.name}</span>
+                            <h2 className="font-title text-2xl text-neonPink mt-2">가장 의심스러운 사람은?</h2>
+                        </div>
+                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-4">
+                            {/* 자신을 제외한 나머지 플레이어 렌더링 */}
+                            {players.filter(p => p.id !== voter.id).map(p => (
+                                <button key={p.id} onClick={() => {
+                                    setBlindVotes(prev => ({...prev, [voter.id]: p.id}));
+                                    setShowBlindVotePass(true);
+                                    setCurrentVoterIndex(prev => prev + 1);
+                                }} className="w-full glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-white/10 active:bg-neonPink/20 transition-all border border-transparent active:border-neonPink">
+                                    <span className="font-bold text-lg">{p.name}</span>
+                                    <span className="text-gray-500 text-sm">지목 👉</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderVote = () => (
+                <div className="flex flex-col min-h-screen p-6 animate-slide-up">
+                    <div className="text-center mb-8 mt-4">
+                        <h2 className="font-title text-3xl text-neonPink mb-2">지목 시간</h2>
+                        <p className="text-gray-300 text-sm">토론 결과를 바탕으로<br/>가장 수상한 사람을 선택하세요.</p>
+                    </div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-4 space-y-3">
+                        {players.map(p => (
+                            <button key={p.id} onClick={() => setSelectedSuspectId(p.id)}
+                                className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${selectedSuspectId === p.id ? 'bg-neonPink/20 border-2 border-neonPink shadow-[0_0_15px_rgba(255,99,170,0.3)]' : 'glass-panel hover:bg-white/10'}`}>
+                                <span className="font-bold text-lg">{p.name}</span>
+                                {selectedSuspectId === p.id && <span className="text-neonPink text-xl">🎯</span>}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                        <button disabled={selectedSuspectId === null}
+                            onClick={() => { setDefenseTimeLeft(20); setIsDefenseRunning(true); setView('defense'); }} 
+                            className={`${btnPrimary} ${selectedSuspectId === null ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}>
+                            이 사람으로 확정
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderDefense = () => {
+                const suspect = players.find(p => p.id === selectedSuspectId);
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen p-6 animate-fade-in text-center">
+                        <div className="text-6xl mb-6 animate-bounce">⚖️</div>
+                        <h2 className="font-title text-4xl text-white mb-2">최후의 변론</h2>
+                        <p className="text-gray-300 mb-8"><strong className="text-neonPink text-xl">{suspect.name}</strong>님이 지목되었습니다!<br/>자신이 왜 과학자인지 해명하세요.</p>
+                        <div className="w-40 h-40 rounded-full border-4 border-neonBlue flex items-center justify-center mb-10 shadow-[0_0_20px_rgba(0,184,255,0.4)]">
+                            <span className="font-title text-6xl text-neonBlue">{defenseTimeLeft}</span>
+                        </div>
+                        <div className="w-full max-w-sm flex flex-col gap-3">
+                            <button onClick={() => {
+                                setIsDefenseRunning(false);
+                                const isCorrect = selectedSuspectId === liarId;
+                                setPlayers(prev => prev.map(p => {
+                                    if (isCorrect) return p.id !== liarId ? { ...p, score: p.score + 1 } : p;
+                                    else return p.id === liarId ? { ...p, score: p.score + 3 } : p;
+                                }));
+                                setView('result');
+                            }} className={btnDanger}>
+                                변론 종료 및 정체 공개 🚨
+                            </button>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderResult = () => {
+                const isCorrect = selectedSuspectId === liarId;
+                const liarPlayer = players.find(p => p.id === liarId);
+                const suspectPlayer = players.find(p => p.id === selectedSuspectId);
+
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen p-6 animate-fade-in text-center">
+                        <h2 className="font-title text-4xl mb-6">정체 공개</h2>
+                        <div className={`w-full max-w-md p-8 rounded-3xl mb-6 border-2 ${isCorrect ? 'bg-neonMint/10 border-neonMint' : 'bg-neonPink/10 border-neonPink'} shadow-2xl`}>
+                            <p className="text-gray-300 mb-1">지목된 사람: {suspectPlayer.name}</p>
+                            <div className="my-4">
+                                <span className="text-sm text-gray-400">실제 라이어는...</span>
+                                <h3 className={`font-title text-5xl mt-2 ${isCorrect ? 'text-neonMint' : 'text-neonPink'}`}>{liarPlayer.name}</h3>
+                            </div>
+                            <div className="bg-black/50 p-4 rounded-xl mt-4">
+                                <p className="text-sm text-gray-400 mb-1">이번 라운드 제시어</p>
+                                <p className="font-bold text-2xl text-white">{targetConcept.word}</p>
+                            </div>
+                        </div>
+                        <h3 className="font-bold text-2xl mb-6">{isCorrect ? '🎉 과학자 팀 승리! (각 +1점)' : '😈 라이어 승리! (라이어 +3점)'}</h3>
+                        
+                        {isSecretMissionMode && !isCorrect && (
+                            <div className="w-full max-w-md glass-panel p-4 rounded-xl mb-6 flex flex-col items-center">
+                                <p className="text-neonYellow text-sm font-bold mb-2">미션 타겟: {players.find(p=>p.id===secretMissionPlayerId)?.name} (미션어: {secretMissionWord})</p>
+                                {!missionAccomplished ? (
+                                    <button onClick={() => {
+                                        setMissionAccomplished(true);
+                                        setPlayers(prev => prev.map(p => p.id === secretMissionPlayerId ? {...p, score: p.score + 1} : p));
+                                    }} className="px-4 py-2 rounded-lg bg-neonYellow/20 text-neonYellow border border-neonYellow text-sm hover:bg-neonYellow/30">
+                                        미션 성공했음 (+1점 추가)
+                                    </button>
+                                ) : <span className="text-neonYellow font-bold">✨ 미션 성공 보너스 적용 완료!</span>}
+                            </div>
+                        )}
+                        <div className="w-full max-w-sm flex flex-col gap-3">
+                            <button onClick={() => { setCurrentRound(r => r + 1); startRound(); }} className={btnPrimary}>다음 라운드 진행</button>
+                            <button onClick={() => setView('leaderboard')} className={btnSecondary}>최종 점수 보기 및 종료</button>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderLeaderboard = () => {
+                const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+
+                // [기능2] 오늘의 오답 노트 모달 띄우기
+                const showReviewNotes = () => {
+                    const content = (
+                        <div className="space-y-3 pb-2">
+                            {usedConceptsHistory.map((item, i) => (
+                                <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-xl text-left">
+                                    <div className="text-xs text-neonMint font-bold mb-1">{item.round}라운드 제시어</div>
+                                    <div className="text-xl font-title text-white mb-1">{item.word}</div>
+                                    <div className="text-sm text-gray-300 break-keep">{item.desc}</div>
+                                </div>
+                            ))}
+                        </div>
+                    );
+                    showModal({ type: 'info', title: '📖 오늘의 오답 노트', content: content, onClose: closeModal });
+                };
+
+                return (
+                    <div className="flex flex-col min-h-screen p-6 animate-slide-up">
+                        <h2 className="font-title text-4xl text-center text-neonMint mb-2 mt-8">최종 순위</h2>
+                        <p className="text-center text-gray-400 text-sm mb-6">총 {currentRound} 라운드 진행</p>
+
+                        <div className="flex-1 space-y-3 max-w-md w-full mx-auto overflow-y-auto no-scrollbar pb-4">
+                            {sortedPlayers.map((p, index) => (
+                                <div key={p.id} className="glass-panel p-4 rounded-xl flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <span className={`font-title text-2xl ${index === 0 ? 'text-neonMint' : index === 1 ? 'text-blue-300' : index === 2 ? 'text-orange-300' : 'text-gray-500'}`}>{index + 1}</span>
+                                        <span className="font-bold text-lg">{p.name}</span>
+                                    </div>
+                                    <span className="font-title text-xl text-white">{p.score} PT</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-4 max-w-md w-full mx-auto flex flex-col gap-3 border-t border-white/10 pt-4">
+                            {/* [기능2] 오답 노트 버튼 */}
+                            <button onClick={showReviewNotes} className="w-full py-4 rounded-2xl bg-white/10 text-neonMint font-title text-xl border border-neonMint/50 hover:bg-white/20 active:scale-95 transition-all">
+                                오늘 출제된 개념 복습하기 📖
+                            </button>
+                            <button onClick={submitGameData} className={btnPrimary}>결과 데이터 저장하기</button>
+                            <button onClick={resetGame} className={btnSecondary}>처음으로 돌아가기</button>
+                        </div>
+                    </div>
+                );
+            };
+
+            const showGuideModal = () => {
+                const guideContent = (
+                    <div className="space-y-4 text-left">
+                        <div className="bg-neonMint/10 border border-neonMint/30 p-4 rounded-xl mb-4">
+                            <h4 className="font-bold text-neonMint mb-2">🚀 하나의 앱으로 모든 단원 커버하기!</h4>
+                            <p className="text-xs text-gray-300 mb-3 leading-relaxed">
+                                학생들에게 매번 링크를 입력하게 할 필요가 없습니다! 선생님이 미리 등록한 시트에서 모든 단원을 자동으로 불러와 메뉴로 만듭니다.
+                            </p>
+                            <ol className="text-xs space-y-2 list-decimal ml-4 text-gray-300">
+                                <li>구글 스프레드시트를 생성합니다.</li>
+                                <li><strong>A열: 단원명, B열: 제시어, C열: 설명, D열: 라이어 가짜단어, E열(선택): 시크릿 미션 단어</strong> 로 입력합니다.</li>
+                                <li>메뉴에서 <strong>[파일] - [공유] - [웹에 게시]</strong> 클릭</li>
+                                <li>'전체 문서'를 <strong>'쉼표로 구분된 값(.csv)'</strong>으로 변경 후 '게시' 클릭</li>
+                                <li>생성된 링크를 복사하여 <strong>HTML 소스 코드 10번째 줄의 <code>MASTER_CSV_URL = ""</code> 안에</strong> 붙여넣고 배포하세요!</li>
+                            </ol>
+                            <p className="text-xs text-neonYellow mt-3 font-bold text-center">
+                                💡 배포된 주소 하나만 알려주면 학기 내내 사용 가능합니다!
+                            </p>
+                        </div>
+                        <p className="text-sm font-bold text-white mt-4 border-t border-white/20 pt-4">점수 결과 저장용 (선택사항)</p>
+                        <p className="text-xs text-gray-400 mb-2">1. 결과를 저장할 시트를 새로 만들고 [확장 프로그램] - [Apps Script]에 아래 코드를 붙여넣으세요.</p>
+                        <pre className="bg-black/50 p-3 rounded-lg text-[10px] font-mono overflow-x-auto text-green-400 mb-2 border border-white/10">
+{`function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (sheet.getLastRow() === 0) sheet.appendRow(['Date', 'Group', 'Theme', 'Rounds', 'Player Data']);
+  try {
+    const data = JSON.parse(e.postData.contents);
+    sheet.appendRow([data.date, data.group, data.theme, data.rounds, JSON.stringify(data.players)]);
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}`}
+                        </pre>
+                        <p className="text-xs text-gray-400">2. 웹 앱으로 배포 후 URL을 소스 코드의 <code>SCORE_SAVE_URL</code> 에 넣으세요.</p>
+                        
+                        <div className="mt-6 pt-4 border-t border-white/10 text-center">
+                            <p className="text-xs text-gray-400">
+                                웹앱 기획 및 제작: <strong className="text-neonMint font-bold text-sm tracking-widest ml-1">Yang DH</strong>
+                            </p>
+                        </div>
+                    </div>
+                );
+                showModal({ type: 'info', title: '⚙️ 마스터 시트 연동 가이드', content: guideContent, onClose: closeModal });
+            };
+
+            let currentViewNode;
+            switch(view) {
+                case 'intro': currentViewNode = renderIntro(); break;
+                case 'deck_select': currentViewNode = renderDeckSelect(); break;
+                case 'settings': currentViewNode = renderSettings(); break;
+                case 'name_input': currentViewNode = renderNameInput(); break;
+                case 'role_check': currentViewNode = renderRoleCheck(); break;
+                case 'discussion': currentViewNode = renderDiscussion(); break;
+                case 'blind_vote': currentViewNode = renderBlindVote(); break; // [기능3] 비밀 투표 라우팅 추가
+                case 'vote': currentViewNode = renderVote(); break;
+                case 'defense': currentViewNode = renderDefense(); break;
+                case 'result': currentViewNode = renderResult(); break;
+                case 'leaderboard': currentViewNode = renderLeaderboard(); break;
+                default: currentViewNode = renderIntro();
+            }
+
+            return (
+                <div className="relative min-h-screen w-full max-w-md mx-auto bg-darkBg/50 shadow-2xl overflow-hidden text-white">
+                    <button onClick={showGuideModal} className="fixed top-4 right-4 z-[60] w-10 h-10 rounded-full glass-panel flex items-center justify-center text-xl hover:bg-white/10" title="가이드">⚙️</button>
+                    {currentViewNode}
+                    <CustomModal {...modal} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
