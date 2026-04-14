@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>과학 라이어 게임</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<!-- 폰트 변경: Black Han Sans 제거, Noto Sans KR만 사용 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 /* 기본 스타일 세팅 */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -19,8 +20,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
 .screen.active{display:flex}
 .inner{width:100%;max-width:440px}
 
-/* 타이포그래피 */
-.title{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.9rem,7vw,2.8rem);text-align:center;background:linear-gradient(135deg,#63ffbe,#ff63aa,#63aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.3;margin-bottom:2px;}
+/* 타이포그래피 (폰트 수정) */
+.title{font-weight:900;font-size:clamp(1.9rem,7vw,2.8rem);text-align:center;background:linear-gradient(135deg,#63ffbe,#ff63aa,#63aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.3;margin-bottom:2px;}
 .subtitle{text-align:center;font-size:.8rem;color:#667;margin-bottom:20px;letter-spacing:1px}
 
 /* 카드 및 UI 요소 */
@@ -56,7 +57,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
 .kw-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:24px 20px;width:100%;max-width:340px;text-align:left;animation:pop .35s cubic-bezier(.34,1.56,.64,1);}
 .kw-role{font-size:.65rem;font-weight:800;letter-spacing:3px;margin-bottom:12px}
 .kw-role.sci{color:#63ffbe}.kw-role.liar{color:#ff4466}.kw-role.mission{color:#ffaa33}
-.kw-word{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.7rem,7vw,2.4rem);line-height:1.2;margin-bottom:10px;}
+.kw-word{font-weight:900;font-size:clamp(1.7rem,7vw,2.4rem);line-height:1.2;margin-bottom:10px;}
 .kw-desc{font-size:.8rem;color:#889;line-height:1.75;border-top:1px solid rgba(255,255,255,.05);padding-top:10px;}
 .hint-box{margin-top:12px;padding:12px;background:rgba(0,0,0,.3);border-radius:12px;border:1px solid rgba(255,255,255,.1);}
 .hint-btn{width:100%;padding:10px;border-radius:8px;border:1px solid #63aaff;background:rgba(99,170,255,.1);color:#63aaff;font-size:.8rem;font-weight:700;cursor:pointer;margin-top:10px;}
@@ -65,7 +66,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
 .timer-ring{width:220px;height:220px;position:relative;margin-bottom:24px}
 .timer-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
 .timer-digits{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.timer-num{font-family:'Black Han Sans',sans-serif;font-size:clamp(2.6rem,10vw,3.8rem)}
+.timer-num{font-weight:900;font-size:clamp(2.6rem,10vw,3.8rem)}
 .vote-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:9px;margin:16px 0;width:100%;}
 .vote-btn{padding:14px 8px;border-radius:14px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#aab;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;}
 .vote-btn.picked{border-color:#ff4466;background:rgba(255,68,102,.12);color:#ff4466;box-shadow:0 0 18px rgba(255,68,102,.15)}
@@ -164,7 +165,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
         <div class="card">
             <div class="card-label">참여 인원 & 시간</div>
             <div class="btn-row" id="playerBtns"></div>
-            <!-- 최대 180초 옵션 추가 복구 -->
             <div class="btn-row" id="timerBtns" style="justify-content:center;"></div>
         </div>
         
@@ -272,9 +272,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
 <div id="s-defense" class="screen">
     <div class="inner" style="margin:auto 0; text-align:center;">
         <div style="font-size:5rem;margin-bottom:10px;animation:pulse .5s infinite alternate;">🚨</div>
-        <h2 class="title" style="font-size:3.5rem;margin-bottom:8px;color:#ff63aa;background:none;-webkit-text-fill-color:#ff63aa;text-shadow:0 0 20px rgba(255,99,170,0.5);">라이어 검거!</h2>
+        <h2 class="title" style="font-size:3.5rem;font-weight:900;margin-bottom:8px;color:#ff63aa;background:none;-webkit-text-fill-color:#ff63aa;text-shadow:0 0 20px rgba(255,99,170,0.5);">라이어 검거!</h2>
         
-        <div id="defSuspectName" style="margin-bottom:20px;line-height:1.4;font-family:'Black Han Sans';"></div>
+        <div id="defSuspectName" style="margin-bottom:20px;line-height:1.4;font-weight:900;"></div>
         
         <p style="color:#e0e0ec;margin-bottom:20px;font-size:1.05rem;font-weight:700;line-height:1.6;">
             하지만 아직 끝이 아닙니다!<br>
@@ -324,7 +324,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
 <div class="modal-overlay" id="guideModal" onclick="if(event.target===this) closeGuideModal()">
     <div class="modal-sheet" style="max-height:85vh;">
         <div class="modal-header">
-            <h3 style="font-family:'Black Han Sans';font-size:1.2rem;color:#fff;">⚙️ 선생님 활용 가이드</h3>
+            <h3 style="font-weight:900;font-size:1.2rem;color:#fff;">⚙️ 선생님 활용 가이드</h3>
             <button class="modal-close" onclick="closeGuideModal()">✕</button>
         </div>
         <div class="modal-body">
@@ -366,7 +366,7 @@ function doPost(e) {
 <div class="modal-overlay" id="reviewModal" onclick="if(event.target===this) closeReviewModal()">
     <div class="modal-sheet" style="max-height:85vh;">
         <div class="modal-header">
-            <h3 style="font-family:'Black Han Sans';font-size:1.2rem;color:#fff;">📖 오늘의 복습장</h3>
+            <h3 style="font-weight:900;font-size:1.2rem;color:#fff;">📖 오늘의 복습장</h3>
             <button class="modal-close" onclick="closeReviewModal()">✕</button>
         </div>
         <div class="modal-body" id="reviewListArea">
@@ -377,6 +377,43 @@ function doPost(e) {
 
 
 <script>
+// ==========================================
+// 오디오 시스템 (Web Audio API)
+// ==========================================
+let audioCtx = null;
+function getAudio() {
+    if(!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch(e) { return null; }
+    }
+    return audioCtx;
+}
+function beep(freq, dur, vol, type='sine') {
+    try {
+        let ac = getAudio(); if(!ac) return;
+        if(ac.state === 'suspended') ac.resume();
+        let osc = ac.createOscillator(), gain = ac.createGain();
+        osc.connect(gain); gain.connect(ac.destination);
+        osc.type = type; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol, ac.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+        osc.start(); osc.stop(ac.currentTime + dur + 0.01);
+    } catch(e) {}
+}
+function tickSound() { beep(880, 0.07, 0.05, 'square'); }
+function warnSound() { beep(660, 0.1, 0.1, 'triangle'); setTimeout(()=>beep(990, 0.1, 0.1, 'triangle'), 160); }
+function timeupSound() { beep(440, 0.15, 0.2, 'sawtooth'); setTimeout(()=>beep(370, 0.15, 0.2, 'sawtooth'), 200); setTimeout(()=>beep(310, 0.5, 0.2, 'sawtooth'), 400); }
+function urgentBeep() { beep(1047, 0.055, 0.1, 'square'); }
+function successSound() { beep(523.25, 0.1, 0.1, 'sine'); setTimeout(()=>beep(659.25, 0.1, 0.1, 'sine'), 100); setTimeout(()=>beep(783.99, 0.2, 0.1, 'sine'), 200); }
+function failSound() { beep(300, 0.2, 0.15, 'sawtooth'); setTimeout(()=>beep(250, 0.4, 0.15, 'sawtooth'), 200); }
+
+// 사용자 첫 상호작용 시 오디오 컨텍스트 활성화
+document.addEventListener('click', () => {
+    let ac = getAudio();
+    if(ac && ac.state === 'suspended') ac.resume();
+}, { once: true });
+
+
 // ==========================================
 // 1. 구글 시트 연동 URL 설정
 // ==========================================
@@ -528,7 +565,7 @@ function goToSetup(){
         let b = document.createElement('button');
         b.className = 'mode-btn' + (G.activeUnit===unit || (!G.activeUnit && idx===0) ? ' on' : '');
         b.style.textAlign='left'; b.style.flexBasis='100%';
-        b.innerHTML = `<span style="font-size:1.1rem;color:#fff;">${unit}</span><br><span style="font-size:.7rem;color:#889;">${G.deckGroups[unit].concepts.length}개 제시어</span>`;
+        b.innerHTML = `<span style="font-size:1.1rem;color:#fff;font-weight:900;">${unit}</span><br><span style="font-size:.7rem;color:#889;">${G.deckGroups[unit].concepts.length}개 제시어</span>`;
         b.onclick = () => {
             G.activeUnit = unit;
             cGrid.querySelectorAll('.mode-btn').forEach(x=>x.classList.remove('on'));
@@ -638,7 +675,7 @@ function showCard(){
         if(G.modes.fool){
             html += `<div style="font-size:.8rem;color:#889;margin-bottom:4px;">제시어</div><div class="kw-word" style="color:#ff63aa;">${G.card.foolWord}</div>`;
         } else {
-            html += `<h3 style="font-family:'Black Han Sans';font-size:2rem;color:#ff63aa;margin-bottom:10px;">당신은 라이어!</h3><p style="font-size:.85rem;color:#d0d0e0;line-height:1.6;">과학자들의 눈치를 보며 자연스럽게 아는 척 하세요.</p>`;
+            html += `<h3 style="font-weight:900;font-size:2rem;color:#ff63aa;margin-bottom:10px;">당신은 라이어!</h3><p style="font-size:.85rem;color:#d0d0e0;line-height:1.6;">과학자들의 눈치를 보며 자연스럽게 아는 척 하세요.</p>`;
             // 객관식 힌트 (바보모드 아닐때만)
             html += `<button class="hint-btn" onclick="showLiarHint(this)">💡 너무 막막하다면? 힌트 보기</button><div id="hintBox" style="display:none;margin-top:10px;"></div>`;
         }
@@ -650,9 +687,10 @@ function showCard(){
                 <div style="font-size:.7rem;font-weight:800;color:#ffaa33;margin-bottom:4px;">🕵️ 시크릿 미션</div>
                 <div style="font-size:.85rem;color:#fff;">토론 중 <strong>[${G.missionWord}]</strong> 단어를 자연스럽게 말하세요!</div>
             </div>`;
-        } else {
-            html += `<div class="kw-desc">${G.card.desc}</div>`;
-        }
+        } 
+        
+        // 시크릿 미션 대상자에게도 설명이 항상 보이도록 (피드백 1번 반영)
+        html += `<div class="kw-desc">${G.card.desc}</div>`;
     }
     html += `</div>`;
     area.innerHTML = html;
@@ -686,7 +724,7 @@ function nextPlayer(){
 }
 
 // ==========================================
-// 토론 (타이머)
+// 토론 (타이머) 및 효과음 발동
 // ==========================================
 function startDiscussion(){
     G.timeLeft = G.timeLimit;
@@ -704,7 +742,17 @@ function startDiscussion(){
         if(G.isTimerPaused) return;
         G.timeLeft--;
         updateTimerUI();
-        if(G.timeLeft <= 0) { clearInterval(G.timerID); goVoteRouting(); }
+        
+        // 효과음 트리거
+        if(G.timeLeft === 30 || G.timeLeft === 10) warnSound();
+        else if(G.timeLeft <= 5 && G.timeLeft > 0) urgentBeep();
+        else if(G.timeLeft % 60 === 0 && G.timeLeft > 0 && G.timeLeft !== G.timeLimit) tickSound();
+
+        if(G.timeLeft <= 0) { 
+            clearInterval(G.timerID); 
+            timeupSound();
+            goVoteRouting(); 
+        }
     }, 1000);
     show('s-timer');
 }
@@ -827,8 +875,9 @@ function processVoteResult(suspectId){
     
     // 라이어가 걸렸을 때만 엄청나게 눈에 띄는 화면과 함께 맞힐 기회 제공
     if (suspectId === G.liarIdx) {
+        warnSound(); // 라이어 검거 알람!
         let p = G.players.find(x => x.id === suspectId);
-        document.getElementById('defSuspectName').innerHTML = `<span style="font-size:3.5rem;color:#ff63aa;font-family:'Black Han Sans';">${p.name}</span><br><span style="font-size:1.5rem;color:#e0e0ec;">당신은 라이어였습니다!</span>`;
+        document.getElementById('defSuspectName').innerHTML = `<span style="font-size:3.5rem;color:#ff63aa;font-weight:900;">${p.name}</span><br><span style="font-size:1.5rem;color:#e0e0ec;font-weight:900;">당신은 라이어였습니다!</span>`;
         document.getElementById('defenseInput').value = '';
         show('s-defense');
     } else {
@@ -846,10 +895,11 @@ function submitDefense(){
 
 function calculateScoresAndResult(wasLiar, isCorrectAns, ans){
     // ★ 점수 계산 (요청하신 규칙) ★
-    // 1. 라이어가 안잡히거나, 역전승 -> 라이어 +2점
-    // 2. 라이어가 잡히고 못맞힘 -> 과학자 각 +1점
     let liarWon = (!wasLiar) || (wasLiar && isCorrectAns);
     
+    if(liarWon) failSound(); // 과학자 입장에선 패배
+    else successSound(); // 과학자 입장에선 승리
+
     G.players.forEach(p => { p._delta = 0; }); 
     if(liarWon){
         let lp = G.players.find(p => p.id === G.liarIdx);
@@ -872,16 +922,16 @@ function renderResultScreen(wasLiar, isCorrectAns, liarWon, ans){
     let html = `<div class="card" style="border-color:${liarWon?'#ff63aa':'#63ffbe'};">`;
     if(!wasLiar){
         html += `<div style="font-size:4rem;margin-bottom:10px;">😈</div>`;
-        html += `<div style="color:#ff63aa;font-size:2rem;font-family:'Black Han Sans';margin-bottom:10px;">라이어 생존!</div>`;
+        html += `<div style="color:#ff63aa;font-size:2rem;font-weight:900;margin-bottom:10px;">라이어 생존!</div>`;
         html += `<p style="font-size:1rem;color:#e0e0ec;line-height:1.6;">지목된 <strong style="color:#ffaa33;font-size:1.2rem;">${suspect.name}</strong> 님은 선량한 과학자였습니다.<br>진짜 라이어는 <strong style="color:#ff63aa;font-size:1.2rem;">${liar.name}</strong> 님!</p>`;
     } else {
         if(isCorrectAns){
             html += `<div style="font-size:4rem;margin-bottom:10px;">🎯</div>`;
-            html += `<div style="color:#ff63aa;font-size:2rem;font-family:'Black Han Sans';margin-bottom:10px;">라이어 대역전승!</div>`;
+            html += `<div style="color:#ff63aa;font-size:2rem;font-weight:900;margin-bottom:10px;">라이어 대역전승!</div>`;
             html += `<p style="font-size:1rem;color:#e0e0ec;line-height:1.6;">라이어 <strong style="color:#ffaa33;font-size:1.2rem;">${liar.name}</strong> 님이 정답을 정확히 맞췄습니다!</p>`;
         } else {
             html += `<div style="font-size:4rem;margin-bottom:10px;">🎉</div>`;
-            html += `<div style="color:#63ffbe;font-size:2rem;font-family:'Black Han Sans';margin-bottom:10px;">과학자 팀 완벽 승리!</div>`;
+            html += `<div style="color:#63ffbe;font-size:2rem;font-weight:900;margin-bottom:10px;">과학자 팀 완벽 승리!</div>`;
             let tryText = ans ? `"<span style="color:#ffaa33">${ans}</span>" 라고 외쳤지만 오답입니다.` : `정답을 외치지 못했습니다.`;
             html += `<p style="font-size:1rem;color:#e0e0ec;line-height:1.6;">라이어 <strong style="color:#ff63aa;font-size:1.2rem;">${liar.name}</strong> 님이 꼼짝없이 잡혔습니다!<br>${tryText}</p>`;
         }
@@ -889,14 +939,14 @@ function renderResultScreen(wasLiar, isCorrectAns, liarWon, ans){
     
     html += `<div style="background:rgba(0,0,0,.4);border-radius:12px;padding:12px;margin-top:16px;">
         <div style="font-size:.75rem;color:#889;margin-bottom:4px;">이번 라운드 진짜 제시어</div>
-        <div style="font-size:1.8rem;color:#fff;font-family:'Black Han Sans';">${G.card.word}</div>
+        <div style="font-size:1.8rem;color:#fff;font-weight:900;">${G.card.word}</div>
     </div></div>`;
     
     // ==========================================
-    // 매 라운드 끝날 때마다 중간 점수 보여주기 (요청 반영)
+    // 매 라운드 끝날 때마다 중간 점수 보여주기
     // ==========================================
     let scoreHtml = `<div class="card" style="margin-top:16px;text-align:left;padding:16px;">`;
-    scoreHtml += `<div style="font-size:1.2rem;font-family:'Black Han Sans';color:#63aaff;margin-bottom:12px;text-align:center;">🏆 중간 점수 현황</div>`;
+    scoreHtml += `<div style="font-size:1.2rem;font-weight:900;color:#63aaff;margin-bottom:12px;text-align:center;">🏆 중간 점수 현황</div>`;
     
     let sortedPlayers = [...G.players].sort((a,b)=>b.score - a.score);
     sortedPlayers.forEach((p, idx) => {
@@ -944,9 +994,9 @@ function showLeaderboard(){
     sorted.forEach((p, i) => {
         let rankCol = i===0 ? '#63ffbe' : i===1 ? '#63aaff' : i===2 ? '#ffaa33' : '#889';
         list.innerHTML += `<div class="card" style="display:flex;align-items:center;padding:14px;margin-bottom:0;">
-            <div style="width:30px;font-family:'Black Han Sans';font-size:1.4rem;color:${rankCol};">${i+1}</div>
+            <div style="width:30px;font-weight:900;font-size:1.4rem;color:${rankCol};">${i+1}</div>
             <div style="flex:1;text-align:left;font-weight:700;font-size:1.1rem;color:#e0e0ec;margin-left:10px;">${p.name}</div>
-            <div style="font-family:'Black Han Sans';font-size:1.5rem;color:#fff;">${p.score} <span style="font-size:.8rem;color:#889;">PT</span></div>
+            <div style="font-weight:900;font-size:1.5rem;color:#fff;">${p.score} <span style="font-size:.8rem;color:#889;">PT</span></div>
         </div>`;
     });
     show('s-leaderboard');
@@ -993,7 +1043,7 @@ function openReviewModal(){
         G.history.forEach(h => {
             area.innerHTML += `<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-bottom:10px;">
                 <div style="font-size:.7rem;color:#63aaff;font-weight:800;margin-bottom:4px;">ROUND ${h.round}</div>
-                <div style="font-family:'Black Han Sans';font-size:1.4rem;color:#fff;margin-bottom:6px;">${h.word}</div>
+                <div style="font-weight:900;font-size:1.4rem;color:#fff;margin-bottom:6px;">${h.word}</div>
                 <div style="font-size:.85rem;color:#d0d0e0;line-height:1.6;word-break:keep-all;">${h.desc}</div>
             </div>`;
         });
