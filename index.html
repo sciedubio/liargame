@@ -34,7 +34,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
 .chip.on{border-color:#63ffbe;background:rgba(99,255,190,.1);color:#63ffbe;box-shadow:0 0 16px rgba(99,255,190,.12)}
 .mode-btn{flex:1;padding:12px 8px;border-radius:14px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#aab;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;line-height:1.5;}
 .mode-btn.on{border-color:#ff63aa;background:rgba(255,99,170,.1);color:#ff63aa}
-.timer-chip{flex:1;padding:10px 6px;border-radius:12px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#aab;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
+.timer-chip{flex:1;min-width:30%;padding:10px 6px;border-radius:12px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#aab;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
 .timer-chip.on{border-color:#63aaff;background:rgba(99,170,255,.1);color:#63aaff}
 .btn-go{width:100%;padding:16px;border-radius:14px;border:none;font-size:1.05rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#63ffbe,#63aaff);color:#06060f;box-shadow:0 4px 28px rgba(99,255,190,.25);transition:all .25s;margin-top:6px;}
 .btn-go:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(99,255,190,.35)}
@@ -70,7 +70,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
 .vote-btn{padding:14px 8px;border-radius:14px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#aab;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;}
 .vote-btn.picked{border-color:#ff4466;background:rgba(255,68,102,.12);color:#ff4466;box-shadow:0 0 18px rgba(255,68,102,.15)}
 
-/* 최후의 반론 */
+/* 최후의 반론 (라이어 검거 화면) */
 .defense-input-area{background:rgba(255,255,255,.03);border:2px solid rgba(99,170,255,.25);border-radius:16px;padding:18px;margin:14px 0;width:100%;text-align:center;}
 .defense-input{width:100%;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:15px;color:#e0e0ec;font-size:1.1rem;font-weight:700;text-align:center;outline:none;}
 .defense-input:focus{border-color:#63aaff;background:rgba(99,170,255,.07);}
@@ -164,7 +164,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
         <div class="card">
             <div class="card-label">참여 인원 & 시간</div>
             <div class="btn-row" id="playerBtns"></div>
-            <div class="btn-row" id="timerBtns"></div>
+            <!-- 최대 180초 옵션 추가 복구 -->
+            <div class="btn-row" id="timerBtns" style="justify-content:center;"></div>
         </div>
         
         <div class="card">
@@ -267,22 +268,24 @@ body{font-family:'Noto Sans KR',sans-serif;background:#06060f;color:#e0e0ec;-web
     </div>
 </div>
 
-<!-- ══════════ 7. 최후의 반론 화면 ══════════ -->
+<!-- ══════════ 7. 최후의 반론 화면 (라이어 전용) ══════════ -->
 <div id="s-defense" class="screen">
     <div class="inner" style="margin:auto 0; text-align:center;">
-        <div style="font-size:3.5rem;margin-bottom:10px;">⚖️</div>
-        <h2 class="title" style="font-size:2.2rem;margin-bottom:8px;">최후의 변론 (제시어 맞히기)</h2>
-        <p style="color:#e0e0ec;margin-bottom:20px;line-height:1.5;">
-            <strong style="color:#ff63aa;font-size:1.2rem;" id="defSuspectName"></strong>님이 지목되었습니다!<br>
-            <span style="font-size:.85rem;color:#889;">라이어라면 과학자들의 제시어를 맞춰 역전승하세요.</span>
+        <div style="font-size:5rem;margin-bottom:10px;animation:pulse .5s infinite alternate;">🚨</div>
+        <h2 class="title" style="font-size:3.5rem;margin-bottom:8px;color:#ff63aa;background:none;-webkit-text-fill-color:#ff63aa;text-shadow:0 0 20px rgba(255,99,170,0.5);">라이어 검거!</h2>
+        
+        <div id="defSuspectName" style="margin-bottom:20px;line-height:1.4;font-family:'Black Han Sans';"></div>
+        
+        <p style="color:#e0e0ec;margin-bottom:20px;font-size:1.05rem;font-weight:700;line-height:1.6;">
+            하지만 아직 끝이 아닙니다!<br>
+            <span style="color:#63ffbe;">과학자들의 제시어를 정확히 맞히면 역전승합니다.</span>
         </p>
         
-        <div class="defense-input-area">
-            <input type="text" id="defenseInput" class="defense-input" placeholder="제시어를 입력하세요 (라이어용)" autocomplete="off">
-            <p style="font-size:.7rem;color:#556;margin-top:10px;">과학자는 빈칸으로 제출하거나 변론만 하셔도 됩니다.</p>
+        <div class="defense-input-area" style="border-color:#ff63aa;">
+            <input type="text" id="defenseInput" class="defense-input" style="border-color:#ff63aa;" placeholder="진짜 제시어를 입력하세요!" autocomplete="off">
         </div>
         
-        <button class="btn-go" style="background:linear-gradient(135deg,#ff63aa,#ff4466);" onclick="submitDefense()">제출 및 정체 공개 🚨</button>
+        <button class="btn-go" style="background:linear-gradient(135deg,#ff63aa,#ff4466);font-size:1.2rem;padding:20px;" onclick="submitDefense()">제출 및 최종 결과 확인 🚨</button>
     </div>
 </div>
 
@@ -401,7 +404,7 @@ let G = {
     timeLimit: 60,
     modes: { blind: false, shuffle: true, fool: false, mission: false },
     groupName: "",
-    players: [], // { id, name, score }
+    players: [], // { id, name, score, _delta }
     
     round: 0,
     card: null,
@@ -450,12 +453,12 @@ window.onload = async () => {
             let names = JSON.parse(savedNames);
             if(names.length >= 3){
                 G.playersCount = names.length;
-                G.players = names.map((n, i) => ({ id: i, name: n, score: 0 }));
+                G.players = names.map((n, i) => ({ id: i, name: n, score: 0, _delta: 0 }));
             }
         } catch(e){}
     }
     if(G.players.length === 0) {
-        G.players = Array.from({length: G.playersCount}, (_, i) => ({ id: i, name: `참여자 ${i+1}`, score: 0 }));
+        G.players = Array.from({length: G.playersCount}, (_, i) => ({ id: i, name: `참여자 ${i+1}`, score: 0, _delta: 0 }));
     }
 
     // 데이터 로드
@@ -509,8 +512,9 @@ function goToSetup(){
         pBtns.appendChild(b);
     }
     
+    // 최대 시간 180초 복구
     let tBtns = document.getElementById('timerBtns'); tBtns.innerHTML='';
-    [30, 60, 90, 120].forEach(t => {
+    [30, 60, 90, 120, 150, 180].forEach(t => {
         let b = document.createElement('button'); b.className = 'timer-chip'+(G.timeLimit===t?' on':''); b.textContent = t+'초';
         b.onclick = () => { G.timeLimit=t; tBtns.querySelectorAll('.timer-chip').forEach(x=>x.classList.remove('on')); b.classList.add('on'); }
         tBtns.appendChild(b);
@@ -548,7 +552,7 @@ function goToNames(){
     // 플레이어 배열 수 맞추기
     if(G.players.length !== G.playersCount){
         let newP = [];
-        for(let i=0; i<G.playersCount; i++) newP.push(G.players[i] || { id:i, name:`참여자 ${i+1}`, score:0 });
+        for(let i=0; i<G.playersCount; i++) newP.push(G.players[i] || { id:i, name:`참여자 ${i+1}`, score:0, _delta:0 });
         G.players = newP;
     }
     document.getElementById('groupNameInput').value = G.groupName;
@@ -570,6 +574,7 @@ function confirmNames(){
     G.players.forEach((p, i) => {
         p.name = inps[i].value.trim() || `참여자 ${i+1}`;
         p.score = 0; // 초기화
+        p._delta = 0;
     });
     localStorage.setItem('lg_names', JSON.stringify(G.players.map(p=>p.name)));
     
@@ -757,7 +762,7 @@ function goVoteRouting(){
     }
 }
 
-function confirmVote(){ goDefense(G.votedId); }
+function confirmVote(){ processVoteResult(G.votedId); }
 
 // ==========================================
 // 비밀 투표 로직
@@ -801,14 +806,13 @@ function calcBlindVoteResult(){
     let topCandidates = sorted.filter(x => x.cnt === maxCnt);
     
     if(topCandidates.length === 1){
-        goDefense(topCandidates[0].id);
+        processVoteResult(topCandidates[0].id);
     } else {
-        // 동점 처리: 화면 하나 만들어서 재투표 또는 합의 (여기선 간단히 alert 후 첫번째 사람 임시지정하지만, UI로 풀어줌)
+        // 동점 처리
         let msg = "동점 발생! (";
         topCandidates.forEach(c => { msg += G.players.find(p=>p.id===c.id).name + " "; });
-        msg += ")\n합의를 통해 최후의 1명을 구두로 결정하세요!";
+        msg += ")\n합의를 통해 최후의 1명을 결정하세요!";
         alert(msg);
-        // 일반 투표 창 띄워서 최종 결정하게 함
         G.modes.blind = false; // 임시 해제
         goVoteRouting();
         G.modes.blind = true; // 복구
@@ -816,35 +820,40 @@ function calcBlindVoteResult(){
 }
 
 // ==========================================
-// 변론 및 결과
+// 변론 및 결과 분기 처리 (라이어만 기회 줌)
 // ==========================================
-function goDefense(suspectId){
+function processVoteResult(suspectId){
     G.votedId = suspectId;
-    let p = G.players.find(x => x.id === suspectId);
-    document.getElementById('defSuspectName').textContent = p.name;
-    document.getElementById('defenseInput').value = '';
-    show('s-defense');
+    
+    // 라이어가 걸렸을 때만 엄청나게 눈에 띄는 화면과 함께 맞힐 기회 제공
+    if (suspectId === G.liarIdx) {
+        let p = G.players.find(x => x.id === suspectId);
+        document.getElementById('defSuspectName').innerHTML = `<span style="font-size:3.5rem;color:#ff63aa;font-family:'Black Han Sans';">${p.name}</span><br><span style="font-size:1.5rem;color:#e0e0ec;">당신은 라이어였습니다!</span>`;
+        document.getElementById('defenseInput').value = '';
+        show('s-defense');
+    } else {
+        // 선량한 시민이 걸렸다면 변론 없이 즉시 계산 후 결과로 이동
+        calculateScoresAndResult(false, false, "");
+    }
 }
 
 function submitDefense(){
     let ans = document.getElementById('defenseInput').value.trim().replace(/\s/g,'').toLowerCase();
-    let isCorrectAns = false;
-    let wasLiar = G.votedId === G.liarIdx;
-    
-    if(wasLiar && ans !== ""){
-        let realAns = G.card.word.replace(/\s/g,'').toLowerCase();
-        if(ans === realAns) isCorrectAns = true;
-    }
+    let realAns = G.card.word.replace(/\s/g,'').toLowerCase();
+    let isCorrectAns = (ans !== "" && ans === realAns);
+    calculateScoresAndResult(true, isCorrectAns, ans);
+}
 
+function calculateScoresAndResult(wasLiar, isCorrectAns, ans){
     // ★ 점수 계산 (요청하신 규칙) ★
     // 1. 라이어가 안잡히거나, 역전승 -> 라이어 +2점
     // 2. 라이어가 잡히고 못맞힘 -> 과학자 각 +1점
     let liarWon = (!wasLiar) || (wasLiar && isCorrectAns);
     
-    G.players.forEach(p => { p._delta = 0; }); // 임시 델타
+    G.players.forEach(p => { p._delta = 0; }); 
     if(liarWon){
         let lp = G.players.find(p => p.id === G.liarIdx);
-        lp.score += 2; lp._delta = 2;
+        if(lp) { lp.score += 2; lp._delta = 2; }
     } else {
         G.players.forEach(p => {
             if(p.id !== G.liarIdx){ p.score += 1; p._delta = 1; }
@@ -862,44 +871,52 @@ function renderResultScreen(wasLiar, isCorrectAns, liarWon, ans){
     
     let html = `<div class="card" style="border-color:${liarWon?'#ff63aa':'#63ffbe'};">`;
     if(!wasLiar){
-        html += `<div style="font-size:3rem;margin-bottom:10px;">😈</div>`;
-        html += `<div style="color:#ff63aa;font-size:1.5rem;font-family:'Black Han Sans';margin-bottom:10px;">라이어 생존!</div>`;
-        html += `<p style="font-size:.9rem;color:#e0e0ec;line-height:1.6;">지목된 <strong style="color:#ffaa33">${suspect.name}</strong> 님은 선량한 과학자였습니다.<br>진짜 라이어는 <strong style="color:#ff63aa">${liar.name}</strong> 님!</p>`;
+        html += `<div style="font-size:4rem;margin-bottom:10px;">😈</div>`;
+        html += `<div style="color:#ff63aa;font-size:2rem;font-family:'Black Han Sans';margin-bottom:10px;">라이어 생존!</div>`;
+        html += `<p style="font-size:1rem;color:#e0e0ec;line-height:1.6;">지목된 <strong style="color:#ffaa33;font-size:1.2rem;">${suspect.name}</strong> 님은 선량한 과학자였습니다.<br>진짜 라이어는 <strong style="color:#ff63aa;font-size:1.2rem;">${liar.name}</strong> 님!</p>`;
     } else {
         if(isCorrectAns){
-            html += `<div style="font-size:3rem;margin-bottom:10px;">🎯</div>`;
-            html += `<div style="color:#ff63aa;font-size:1.5rem;font-family:'Black Han Sans';margin-bottom:10px;">라이어 대역전승!</div>`;
-            html += `<p style="font-size:.9rem;color:#e0e0ec;line-height:1.6;">라이어 <strong style="color:#ffaa33">${liar.name}</strong> 님이 정답을 맞췄습니다!</p>`;
+            html += `<div style="font-size:4rem;margin-bottom:10px;">🎯</div>`;
+            html += `<div style="color:#ff63aa;font-size:2rem;font-family:'Black Han Sans';margin-bottom:10px;">라이어 대역전승!</div>`;
+            html += `<p style="font-size:1rem;color:#e0e0ec;line-height:1.6;">라이어 <strong style="color:#ffaa33;font-size:1.2rem;">${liar.name}</strong> 님이 정답을 정확히 맞췄습니다!</p>`;
         } else {
-            html += `<div style="font-size:3rem;margin-bottom:10px;">🎉</div>`;
-            html += `<div style="color:#63ffbe;font-size:1.5rem;font-family:'Black Han Sans';margin-bottom:10px;">과학자 팀 승리!</div>`;
-            let tryText = ans ? `"<span style="color:#ffaa33">${ans}</span>" 라고 외쳤지만 틀렸습니다.` : `정답을 외치지 못했습니다.`;
-            html += `<p style="font-size:.9rem;color:#e0e0ec;line-height:1.6;">라이어 <strong style="color:#ff63aa">${liar.name}</strong> 발각!<br>${tryText}</p>`;
+            html += `<div style="font-size:4rem;margin-bottom:10px;">🎉</div>`;
+            html += `<div style="color:#63ffbe;font-size:2rem;font-family:'Black Han Sans';margin-bottom:10px;">과학자 팀 완벽 승리!</div>`;
+            let tryText = ans ? `"<span style="color:#ffaa33">${ans}</span>" 라고 외쳤지만 오답입니다.` : `정답을 외치지 못했습니다.`;
+            html += `<p style="font-size:1rem;color:#e0e0ec;line-height:1.6;">라이어 <strong style="color:#ff63aa;font-size:1.2rem;">${liar.name}</strong> 님이 꼼짝없이 잡혔습니다!<br>${tryText}</p>`;
         }
     }
     
     html += `<div style="background:rgba(0,0,0,.4);border-radius:12px;padding:12px;margin-top:16px;">
         <div style="font-size:.75rem;color:#889;margin-bottom:4px;">이번 라운드 진짜 제시어</div>
-        <div style="font-size:1.5rem;color:#fff;font-family:'Black Han Sans';">${G.card.word}</div>
+        <div style="font-size:1.8rem;color:#fff;font-family:'Black Han Sans';">${G.card.word}</div>
     </div></div>`;
-    area.innerHTML = html;
-
-    // 점수 변화 요약
-    let scoreHtml = `<div style="text-align:left;font-size:.85rem;color:#d0d0e0;background:rgba(255,255,255,.05);padding:10px;border-radius:12px;">`;
-    G.players.forEach(p => {
-        if(p._delta > 0) scoreHtml += `<div style="margin-bottom:4px;">${p.name}: <span style="color:#63ffbe;font-weight:700;">+${p._delta}점</span> (총 ${p.score}점)</div>`;
+    
+    // ==========================================
+    // 매 라운드 끝날 때마다 중간 점수 보여주기 (요청 반영)
+    // ==========================================
+    let scoreHtml = `<div class="card" style="margin-top:16px;text-align:left;padding:16px;">`;
+    scoreHtml += `<div style="font-size:1.2rem;font-family:'Black Han Sans';color:#63aaff;margin-bottom:12px;text-align:center;">🏆 중간 점수 현황</div>`;
+    
+    let sortedPlayers = [...G.players].sort((a,b)=>b.score - a.score);
+    sortedPlayers.forEach((p, idx) => {
+        let deltaText = p._delta > 0 ? `<span style="color:#ff63aa;font-size:.85rem;font-weight:bold;margin-left:6px;animation:pop .5s ease;">(+${p._delta})</span>` : '';
+        scoreHtml += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:6px;">
+            <span style="font-size:1.1rem;"><strong style="color:#e0e0ec;margin-right:8px;">${idx+1}.</strong> ${p.name}</span>
+            <span style="font-size:1.2rem;"><strong style="color:#63ffbe;">${p.score}</strong>점 ${deltaText}</span>
+        </div>`;
     });
     scoreHtml += `</div>`;
-    area.innerHTML += scoreHtml;
+    area.innerHTML = html + scoreHtml;
 
     // 시크릿 미션 처리
     let mArea = document.getElementById('missionResultArea'); mArea.innerHTML='';
     if(G.modes.mission && G.missionTargetIdx !== -1 && !liarWon){
         let mP = G.players.find(p=>p.id===G.missionTargetIdx);
-        mArea.innerHTML = `<div class="card" style="border-color:#ffaa33;">
-            <div style="font-size:.75rem;font-weight:800;color:#ffaa33;margin-bottom:8px;">🕵️ 시크릿 미션 결과</div>
-            <p style="font-size:.85rem;margin-bottom:10px;">${mP.name} 님의 미션: <strong style="color:#fff;">[${G.missionWord}]</strong> 말하기</p>
-            <button class="btn-ghost" style="border-color:#ffaa33;color:#ffaa33;margin:0;padding:10px;" onclick="claimMission(this, ${mP.id})">미션 성공했음 (+1점 획득)</button>
+        mArea.innerHTML = `<div class="card" style="border-color:#ffaa33;margin-top:0;">
+            <div style="font-size:.8rem;font-weight:800;color:#ffaa33;margin-bottom:8px;">🕵️ 시크릿 미션 결과</div>
+            <p style="font-size:.9rem;margin-bottom:10px;">${mP.name} 님의 미션: <strong style="color:#fff;">[${G.missionWord}]</strong> 말하기</p>
+            <button class="btn-ghost" style="border-color:#ffaa33;color:#ffaa33;margin:0;padding:12px;" onclick="claimMission(this, ${mP.id})">미션 성공했음 (+1점 추가 획득)</button>
         </div>`;
     }
 }
@@ -910,6 +927,10 @@ function claimMission(btn, pId){
     btn.textContent = "✨ 보너스 점수 획득 완료!";
     btn.style.background = 'rgba(255,170,51,.2)';
     btn.disabled = true;
+    
+    // 화면상의 점수판도 강제 업데이트 해줍니다.
+    let scoreEl = document.querySelector(`div:contains('${p.name}') strong[style*="color:#63ffbe"]`);
+    if(scoreEl) scoreEl.textContent = p.score;
 }
 
 // ==========================================
@@ -980,6 +1001,15 @@ function openReviewModal(){
     document.getElementById('reviewModal').classList.add('open');
 }
 function closeReviewModal(){ document.getElementById('reviewModal').classList.remove('open'); }
+
+// 커스텀 :contains 선택자 구현 (시크릿 미션 보너스 클릭 시 즉각 UI 갱신용)
+jQuery = null; // 제이쿼리 없이 바닐라로 처리
+HTMLElement.prototype.containsText = function(text) {
+    for (let i = 0; i < this.childNodes.length; i++) {
+        if (this.childNodes[i].nodeType === 3 && this.childNodes[i].nodeValue.includes(text)) return true;
+    }
+    return false;
+};
 
 </script>
 </body>
